@@ -20,8 +20,8 @@ namespace CustomProtofluxBrowser
         private static ModConfiguration Config;
 
         [AutoRegisterConfigKey] private static readonly ModConfigurationKey<bool> Enabled = new ModConfigurationKey<bool>("Enabled", "Enables the mod", () => true);
-        [AutoRegisterConfigKey] private static readonly ModConfigurationKey<bool> UserScale = new ModConfigurationKey<bool>("User scale", "Adjust browser scale to user scale", () => true);
-        [AutoRegisterConfigKey] private static readonly ModConfigurationKey<float> Scale = new ModConfigurationKey<float>("Scale", "Browser size or scale relative to the user when user scale is on", () => 1f);
+        [AutoRegisterConfigKey] private static readonly ModConfigurationKey<bool> EnableModifier = new ModConfigurationKey<bool>("Enable Modifier", "Apply Custom Scale Modifiers", () => false);
+        [AutoRegisterConfigKey] private static readonly ModConfigurationKey<float> ScaleModifier = new ModConfigurationKey<float>("Scale Modifier", "Browser size relative to the original scale", () => 1f);
         private static string PROTOFLUX_BROWSER_TAG
         {
             get { return "custom_protoflux_browser"; }
@@ -68,14 +68,10 @@ namespace CustomProtofluxBrowser
                     await slot.LoadObjectAsync(protofluxBrowserObject.Uri);
                     InventoryItem component = slot.GetComponent<InventoryItem>();
                     Slot slot_two = ((component != null) ? component.Unpack() : null) ?? slot;
-                    slot_two.PositionInFrontOfUser(float3.Backward);
-                    if (Config.GetValue(UserScale))
+                    slot_two.PositionInFrontOfUser(float3.Backward,scale:false);
+                    if (Config.GetValue(EnableModifier))
                     {
-                        slot_two.GlobalScale = slot_two.World.LocalUser.Root.Slot.GlobalScale * Config.GetValue(Scale);
-                    }
-                    else
-                    {
-                        slot_two.GlobalScale = float3.One * Config.GetValue(Scale);
+                        slot_two.GlobalScale *= Config.GetValue(ScaleModifier);
                     }
                 });
 
